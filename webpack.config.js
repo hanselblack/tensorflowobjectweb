@@ -4,6 +4,9 @@ const webpack = require("webpack");
 const autoprefixer = require("autoprefixer");
 
 module.exports = {
+    output:{
+        publicPath: '/'
+    },
     module: {
         rules: [
             {
@@ -25,8 +28,23 @@ module.exports = {
             {
                 test: /\.css$/,
                 use: [MiniCssExtractPlugin.loader, "css-loader","postcss-loader"]
+            },
+            {
+                test: /\.(png|jpg|gif)$/i,
+                use: [
+                    {
+                        loader: 'url-loader',
+                        options: {
+                            limit: 8192,
+                            
+                        }
+                    }
+                ]
             }
         ]
+    },
+    devServer: {
+        historyApiFallback: true,
     },
     plugins: [
         new HtmlWebPackPlugin({
