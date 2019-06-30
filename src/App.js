@@ -11,12 +11,17 @@ class App extends React.Component {
 
     componentDidMount() {
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            const webCamPromise = null;
-            webCamPromise = navigator.mediaDevices
+            var type = "user"
+            var modeltype = "mobilenet_v2"
+            if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                type = { exact: "environment" }
+                modeltype = "lite_mobilenet_v2"
+            }
+            const webCamPromise = navigator.mediaDevices
                 .getUserMedia({
                     audio: false,
                     video: {
-                        facingMode: "user"
+                        facingMode: type
                     }
                 })
                 .then(stream => {
@@ -28,23 +33,7 @@ class App extends React.Component {
                         };
                     });
                 });
-            if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-                webCamPromise = navigator.mediaDevices
-                    .getUserMedia({
-                        audio: false,
-                        video: { facingMode: { exact: "environment" } }
-                    })
-                    .then(stream => {
-                        window.stream = stream;
-                        this.videoRef.current.srcObject = stream;
-                        return new Promise((resolve, reject) => {
-                            this.videoRef.current.onloadedmetadata = () => {
-                                resolve();
-                            };
-                        });
-                    });
-            }
-            const modelPromise = cocoSsd.load('mobilenet_v2')
+            const modelPromise = cocoSsd.load(modeltype)
             //const modelPromise = cocoSsd.load();
             Promise.all([modelPromise, webCamPromise])
                 .then(values => {
