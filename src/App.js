@@ -11,7 +11,8 @@ class App extends React.Component {
 
     componentDidMount() {
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            const webCamPromise = navigator.mediaDevices
+            const webCamPromise = null;
+            webCamPromise = navigator.mediaDevices
                 .getUserMedia({
                     audio: false,
                     video: {
@@ -27,6 +28,22 @@ class App extends React.Component {
                         };
                     });
                 });
+            if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                webCamPromise = navigator.mediaDevices
+                    .getUserMedia({
+                        audio: false,
+                        video: { facingMode: { exact: "environment" } }
+                    })
+                    .then(stream => {
+                        window.stream = stream;
+                        this.videoRef.current.srcObject = stream;
+                        return new Promise((resolve, reject) => {
+                            this.videoRef.current.onloadedmetadata = () => {
+                                resolve();
+                            };
+                        });
+                    });
+            }
             const modelPromise = cocoSsd.load('mobilenet_v2')
             //const modelPromise = cocoSsd.load();
             Promise.all([modelPromise, webCamPromise])
